@@ -13,7 +13,7 @@
 //lilystart
 
 #include "VoiceMain.h"
-
+#include "ADO.h"
 //lilyend
 
 // 用于应用程序“关于”菜单项的 CAboutDlg 对话框
@@ -170,15 +170,15 @@ void CVoiceRecogMFCDlg::OnBnClickedButtonMic()
 void CVoiceRecogMFCDlg::OnBnClickedButtonStart()
 {
 	// TODO:  在此添加控件通知处理程序代码
-	const char *pc = "a character array";
+	const char *pc = "我是";
 	GetDlgItem(IDC_EDIT_RESULT)->SetWindowTextW(CString(pc));
-	
+	VoiceMain::MyStart();
 }
 
 void CVoiceRecogMFCDlg::OnBnClickedButtonEnd()
 {
 	// TODO:  在此添加控件通知处理程序代码
-	VoiceMain::MyMain();
+	VoiceMain::MyStop();
 }
 
 void CVoiceRecogMFCDlg::OnBnClickedButtonQuit()
@@ -186,7 +186,29 @@ void CVoiceRecogMFCDlg::OnBnClickedButtonQuit()
 	// TODO:  在此添加控件通知处理程序代码
 	char *myresult = VoiceMain::MyEnd();
 	GetDlgItem(IDC_EDIT_RESULT)->SetWindowTextW(CString(myresult));
-	GetDlgItem(IDC_STATIC_RESULT)->SetWindowTextW(CString("zaishiyishi"));
+
+	//移除标点符号
+	string result = myresult;
+	while (1)
+	{
+		int nPos = result.find_first_of(",，.。?？!！");
+		if (nPos != string::npos)
+			result = result.substr(0, nPos) + result.substr(nPos + 1, -1);
+		else
+			break;
+	}
+
+	list<People> listPeople = ADO::getPeopleByName(result);
+	result = "";
+	for (list<People>::iterator i = listPeople.begin(); i != listPeople.end(); ++i){
+		result = result + "编号：" + People(*i).getPid() + "\n"
+			+ "姓名：" + People(*i).getPname() + "\n"
+			+ "性别：" + People(*i).getPsex() + "\n"
+			+ "电话：" + People(*i).getPphone() + "\n";
+	}
+
+
+	GetDlgItem(IDC_STATIC_RESULT)->SetWindowTextW(CString(result.c_str()));
 }
 
 void CVoiceRecogMFCDlg::OnEnChangeEditResult()

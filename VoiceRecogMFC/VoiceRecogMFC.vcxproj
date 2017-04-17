@@ -71,7 +71,9 @@
       <AdditionalIncludeDirectories>$(IntDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ResourceCompile>
     <PostBuildEvent>
-      <Command>copy $(TargetPath) $(ProjectDir)..\bin\</Command>
+      <Command>copy $(TargetPath) $(ProjectDir)..\bin\
+ ; 
+editbin /SUBSYSTEM:CONSOLE $(OUTDIR)$(TargetName).exe</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -105,8 +107,9 @@
     <Text Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Myspeech_recognizer.h" />
+    <ClInclude Include="ADO.h" />
     <ClInclude Include="MyVoiceMain.h" />
+    <ClInclude Include="People.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="speech_recognizer.h" />
     <ClInclude Include="stdafx.h" />
@@ -117,8 +120,9 @@
     <ClInclude Include="winrec.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Myspeech_recognizer.cpp" />
+    <ClCompile Include="ADO.cpp" />
     <ClCompile Include="MyVoiceMain.cpp" />
+    <ClCompile Include="People.cpp" />
     <ClCompile Include="speech_recognizer.c">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">NotUsing</PrecompiledHeader>
     </ClCompile>

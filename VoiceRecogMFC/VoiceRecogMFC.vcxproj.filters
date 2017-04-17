@@ -42,10 +42,13 @@
     <ClInclude Include="VoiceMain.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Myspeech_recognizer.h">
+    <ClInclude Include="MyVoiceMain.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="MyVoiceMain.h">
+    <ClInclude Include="ADO.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="People.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -65,13 +68,16 @@
     <ClCompile Include="speech_recognizer.c">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Myspeech_recognizer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="MyVoiceMain.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="VoiceMain.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ADO.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="People.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

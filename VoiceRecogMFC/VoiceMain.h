@@ -1,12 +1,17 @@
 #ifndef _VoiceMain_h_
 #define _VoiceMain_h_
+
+#include <iostream>	
+using namespace std;
+#include <string.h>
+
 class VoiceMain
 {
 public:
 	VoiceMain();
 	~VoiceMain();
 
-
+	static void demo_mic(const char* session_begin_params);
 	//static void show_result(char *string, char is_over);
 	//static void show_key_hints(void);
 	//static int upload_userwords();
@@ -21,5 +26,6 @@ public:
 	static void MyStart();
 	static void MyStop();
 	static char* MyEnd();
+	
 };
 #endif

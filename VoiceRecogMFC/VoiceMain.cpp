@@ -8,11 +8,12 @@
 #include "msp_errors.h"
 #include "VoiceMain.h"
 #include "./speech_recognizer.h"
-#include <iostream>
+	
 #include<conio.h>
-using namespace std;
+
 #define FRAME_LEN	640 
 #define	BUFFER_SIZE	4096
+#define DEFAULT_INPUT_DEVID     (-1)
 enum{
 	EVT_START = 0,
 	EVT_STOP,
@@ -23,7 +24,7 @@ static HANDLE events[EVT_TOTAL] = { NULL, NULL, NULL };
 
 static COORD begin_pos = { 0, 0 };
 static COORD last_pos = { 0, 0 };
-static char* my_result = NULL;
+static char* my_result = (char*)malloc(100 * sizeof(char));
 static void show_result(char *mystring, char is_over)
 {
 	COORD orig, current;
@@ -42,9 +43,11 @@ static void show_result(char *mystring, char is_over)
 	if (is_over)
 		SetConsoleTextAttribute(w, FOREGROUND_GREEN);
 	printf("Result: [ %s ]\n", mystring);
-	//memcpy(my_result, mystring, strlen(mystring));
-	//my_result[strlen(mystring)] = '\0';
-	my_result = mystring;
+
+	memcpy(my_result, mystring, strlen(mystring));
+	my_result[strlen(mystring)] = '\0';
+	/*strcpy(mystring, my_result);*/
+	printf("my_Result: [ %s ]\n", my_result);
 	if (is_over)
 		SetConsoleTextAttribute(w, info.wAttributes);
 
@@ -54,12 +57,7 @@ static void show_result(char *mystring, char is_over)
 
 static void show_key_hints(void)
 {
-	printf("\n\
-		   	----------------------------\n\
-			Press r to start speaking\n\
-			Press s to end your speaking\n\
-			Press q to quit\n\
-																																																																						   																														   										   		   ----------------------------\n");
+	printf("r start s end q quit");
 }
 
 /* 上传用户词表 */
@@ -119,49 +117,6 @@ upload_exit:
 	return ret;
 }
 
-/* helper thread: to listen to the keystroke */
-static unsigned int  __stdcall helper_thread_proc(void * para)
-{
-	int key;
-	int quit = 0;
-	//SetEvent(events[EVT_START]);
-	/*do {
-		key = _getch();
-		switch (key) {
-		case 'r':
-		case 'R':
-			SetEvent(events[EVT_START]);
-			break;
-		case 's':
-		case 'S':
-			SetEvent(events[EVT_STOP]);
-			break;
-		case 'q':
-		case 'Q':
-			quit = 1;
-			SetEvent(events[EVT_QUIT]);
-			PostQuitMessage(0);
-			break;
-		default:
-			break;
-		}
-
-		if (quit)
-			break;
-	} while (1);*/
-
-	return 0;
-}
-
-static HANDLE start_helper_thread()
-{
-	HANDLE hdl;
-
-	hdl = (HANDLE)_beginthreadex(NULL, 0, helper_thread_proc, NULL, 0, NULL);
-
-	return hdl;
-}
-
 static char *g_result = NULL;
 static unsigned int g_buffersize = BUFFER_SIZE;
 
@@ -198,8 +153,12 @@ void on_speech_begin()
 void on_speech_end(int reason)
 {
 	//if (reason == END_REASON_VAD_DETECT)
-	if (reason == 0)
+	if (reason == 0){
 		printf("\nSpeaking done \n");
+		//PostQuitMessage(0);	
+		printf("my_Result: [ %s ]\n", my_result);
+		//GetDlgItem(IDC_EDIT_RESULT)->SetWindowTextW(CString(my_result));
+	}
 	else
 		printf("\nRecognizer error %d\n", reason);
 }
@@ -307,11 +266,11 @@ void on_speech_end(int reason)
 //}
 
 /* demo recognize the audio from microphone */
-static void demo_mic(const char* session_begin_params)
+void demo_mic(const char* session_begin_params)
 {
 	int errcode;
 	int i = 0;
-	HANDLE helper_thread = NULL;
+	//HANDLE helper_thread = NULL;
 
 	struct speech_rec iat;
 	DWORD waitres;
@@ -330,17 +289,17 @@ static void demo_mic(const char* session_begin_params)
 	}
 
 	for (i = 0; i < EVT_TOTAL; ++i) {
-		events[i] = CreateEvent(NULL, FALSE, FALSE, NULL);
+		events[i] = CreateEvent(NULL, FALSE, FALSE, NULL);////线程释放后自动重置为无信号状态，初始化时为无信号状态
 	}
 
-	helper_thread = start_helper_thread();
-	if (helper_thread == NULL) {
-		printf("create thread failed\n");
-		goto exit;
-	}
+	//helper_thread = start_helper_thread();
+	//if (helper_thread == NULL) {
+	//	printf("create thread failed\n");
+	//	goto exit;
+	//}
 
-	show_key_hints();
-
+	//show_key_hints();
+	
 	while (1) {
 		waitres = WaitForMultipleObjects(EVT_TOTAL, events, FALSE, INFINITE);
 		switch (waitres) {
@@ -372,10 +331,10 @@ static void demo_mic(const char* session_begin_params)
 	}
 
 exit:
-	if (helper_thread != NULL) {
-		WaitForSingleObject(helper_thread, INFINITE);
-		CloseHandle(helper_thread);
-	}
+	//if (helper_thread != NULL) {
+	//	WaitForSingleObject(helper_thread, INFINITE);
+	//	CloseHandle(helper_thread);
+	//}
 
 	for (i = 0; i < EVT_TOTAL; ++i) {
 		if (events[i])
@@ -385,8 +344,8 @@ exit:
 	sr_uninit(&iat);
 }
 
-
-void VoiceMain::MyMain()
+/* helper thread: to listen to the keystroke */
+static unsigned int  __stdcall helper_thread_proc(void * para)
 {
 	int			ret = MSP_SUCCESS;
 	int			upload_on = 1; //是否上传用户词表
@@ -441,7 +400,62 @@ void VoiceMain::MyMain()
 	//	printf("按任意键退出 ...\n");
 	//	_getch();
 	//	MSPLogout(); //退出登录
+
+
+	//int key;
+	//int quit = 0;
+	//SetEvent(events[EVT_START]);
+	/*do {
+	key = _getch();
+	switch (key) {
+	case 'r':
+	case 'R':
+	SetEvent(events[EVT_START]);
+	break;
+	case 's':
+	case 'S':
+	SetEvent(events[EVT_STOP]);
+	break;
+	case 'q':
+	case 'Q':
+	quit = 1;
+	SetEvent(events[EVT_QUIT]);
+	PostQuitMessage(0);
+	break;
+	default:
+	break;
+	}
+
+	if (quit)
+	break;
+	} while (1);*/
+
+	return 0;
+}
+
+static HANDLE start_helper_thread()
+{
+	HANDLE hdl;
+
+	hdl = (HANDLE)_beginthreadex(NULL, 0, helper_thread_proc, NULL, 0, NULL);
+
+	return hdl;
+}
+
+void VoiceMain::MyMain()
+{
+	HANDLE helper_thread = NULL;
+	helper_thread = start_helper_thread();
+	if (helper_thread == NULL) {
+		printf("create thread failed\n");
+		goto exit;
+	}
 	
+exit:
+	if (helper_thread != NULL) {
+		//WaitForSingleObject(helper_thread, INFINITE);
+		CloseHandle(helper_thread);
+	}	
 }
 
 void VoiceMain::MyStart()
@@ -457,6 +471,6 @@ void VoiceMain::MyStop()
 char* VoiceMain::MyEnd()
 {
 	SetEvent(events[EVT_QUIT]);
-	PostQuitMessage(0);
 	return my_result;
+	//PostQuitMessage(0);	
 }
